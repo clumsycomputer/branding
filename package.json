@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "name": "@stews.io/branding",
+  "version": "0.0.0",
+  "devDependencies": {
+    "@types/color": "^3.0.3",
+    "preact-cli": "^3.5.0",
+    "sass-loader": "^13.3.2"
+  },
+  "dependencies": {
+    "color": "^4.2.3",
+    "preact": "^10.17.1",
+    "preact-render-to-string": "^6.2.1",
+    "sass": "^1.66.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "developBranding": "NODE_OPTIONS=--openssl-legacy-provider preact watch --src ./source"
+  }
+}
