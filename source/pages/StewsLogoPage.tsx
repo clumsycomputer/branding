@@ -11,12 +11,12 @@ const PALETTE = {
 
 export function StewsLogoPage() {
   const orbitalPointsA = getOrbitalPoints({
-    orbitalResolution: 90,
+    ditherColor: 'black',
+    orbitalResolution: 512,
     orbitalRadius: 6,
     ditherSize: 0.3,
-    ditherColor: PALETTE.darkGreen,
     getPointDepthAngle: (pointStamp) =>
-      (Math.PI / 2.75) * Math.sin(3 * (2 * Math.PI * pointStamp)) + Math.PI / 7,
+      (Math.PI / 8) * Math.sin(3 * (2 * Math.PI * pointStamp)) + Math.PI / 3,
     getPointSliceAngle: (pointStamp) => 2 * Math.PI * pointStamp,
     depthCosine: Math.cos,
     depthSine: Math.sin,
@@ -24,12 +24,12 @@ export function StewsLogoPage() {
     sliceSine: Math.sin,
   })
   const orbitalPointsB = getOrbitalPoints({
-    orbitalResolution: 60,
+    ditherColor: 'black',
+    orbitalResolution: 120,
     orbitalRadius: 6,
-    ditherSize: 0.3375,
-    ditherColor: PALETTE.darkOrange,
+    ditherSize: 0.2,
     getPointDepthAngle: (pointStamp) =>
-      (Math.PI / 1.5) * Math.sin(9 * (2 * Math.PI * pointStamp)) + Math.PI / 4,
+      (Math.PI / 1.25) * Math.sin(3 * (2 * Math.PI * pointStamp)) + Math.PI / 3,
     getPointSliceAngle: (pointStamp) => 2 * Math.PI * pointStamp,
     depthCosine: Math.cos,
     depthSine: Math.sin,
@@ -37,13 +37,13 @@ export function StewsLogoPage() {
     sliceSine: Math.sin,
   })
   const orbitalPointsC = getOrbitalPoints({
-    orbitalResolution: 40,
+    ditherColor: 'black',
+    orbitalResolution: 120,
     orbitalRadius: 6,
-    ditherSize: 0.4,
-    ditherColor: PALETTE.yellow,
+    ditherSize: 0.1,
     getPointDepthAngle: (pointStamp) =>
-      (Math.PI / 1.25) * Math.sin(81 * (2 * Math.PI * pointStamp)) +
-      Math.PI / 2,
+      (Math.PI / 1.25) * Math.sin(215 * (2 * Math.PI * pointStamp)) +
+      Math.PI / 3,
     getPointSliceAngle: (pointStamp) => 2 * Math.PI * pointStamp,
     depthCosine: Math.cos,
     depthSine: Math.sin,
@@ -54,7 +54,7 @@ export function StewsLogoPage() {
     <div
       style={{
         display: 'flex',
-        maxInlineSize: 128,
+        maxInlineSize: 512,
       }}
     >
       <PerspectiveGraphic
