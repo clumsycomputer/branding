@@ -1,21 +1,7 @@
 import Color from 'color'
+import { JSXInternal } from 'preact/src/jsx'
 
-export interface PerspectiveGraphicProps {
-  cameraDepth: number
-  perspectiveVerticalFieldOfViewAngle: number
-  perspectiveDepthNear: number
-  perspectiveDepthFar: number
-  lightDepth: number
-  someWorldPoints: Array<GenericWorldPoint>
-  backgroundColor?: string
-}
-
-export interface ViewRectangle {
-  x: number
-  y: number
-  width: number
-  height: number
-}
+export type GenericWorldPoint = [...WorldPoint, ...Array<unknown>]
 
 export type WorldPoint = [
   x: number,
@@ -25,19 +11,108 @@ export type WorldPoint = [
   color: string
 ]
 
-export type GenericWorldPoint = [...WorldPoint, ...Array<unknown>]
+interface PerspectiveGraphicProps extends PerspectiveGraphicDataProps {
+  graphicType: 'square' | 'circle'
+}
+
+export function PerspectiveGraphic(props: PerspectiveGraphicProps) {
+  const { graphicType, ...dataProps } = props
+  const SomePerspectiveGraphic =
+    graphicType === 'circle'
+      ? CirclePerspectiveGraphic
+      : graphicType === 'square'
+      ? SquarePerspectiveGraphic
+      : throwInvalidPathError('PerspectiveGraphic.SomePerspectiveGraphic')
+  return <SomePerspectiveGraphic {...dataProps} />
+}
+
+interface CirclePerspectiveGraphicProps extends PerspectiveGraphicDataProps {}
+
+function CirclePerspectiveGraphic(props: CirclePerspectiveGraphicProps) {
+  return (
+    <PerspectiveGraphicBase
+      GraphicPointDisplay={CirclePointGraphicDisplay}
+      {...props}
+    />
+  )
+}
+
+function CirclePointGraphicDisplay(props: GraphicPointDisplayProps) {
+  const { graphicPointX, graphicPointY, graphicPointSize, graphicPointColor } =
+    props
+  return (
+    <circle
+      cx={graphicPointX}
+      cy={graphicPointY}
+      r={graphicPointSize}
+      fill={graphicPointColor}
+    />
+  )
+}
+
+interface SquarePerspectiveGraphicProps extends PerspectiveGraphicDataProps {}
+
+function SquarePerspectiveGraphic(props: SquarePerspectiveGraphicProps) {
+  return (
+    <PerspectiveGraphicBase
+      GraphicPointDisplay={SquarePointGraphicDisplay}
+      {...props}
+    />
+  )
+}
+
+function SquarePointGraphicDisplay(props: GraphicPointDisplayProps) {
+  const { graphicPointSize, graphicPointX, graphicPointY, graphicPointColor } =
+    props
+  const doubleGraphicPointSize = 2 * graphicPointSize
+  return (
+    <rect
+      x={graphicPointX - graphicPointSize}
+      y={graphicPointY - graphicPointSize}
+      width={doubleGraphicPointSize}
+      height={doubleGraphicPointSize}
+      fill={graphicPointColor}
+    />
+  )
+}
+
+interface PerspectiveGraphicBaseProps
+  extends PerspectiveGraphicDataProps,
+    PerspectiveGraphicConfigProps {}
+
+interface PerspectiveGraphicDataProps {
+  backgroundColor: string
+  cameraDepth: number
+  perspectiveVerticalFieldOfViewAngle: number
+  perspectiveDepthNear: number
+  perspectiveDepthFar: number
+  lightDepth: number
+  someWorldPoints: Array<GenericWorldPoint>
+}
+
+interface PerspectiveGraphicConfigProps {
+  GraphicPointDisplay: (props: GraphicPointDisplayProps) => JSXInternal.Element
+}
 
 type GraphicPoint = [...WorldPoint, number]
 
-export function PerspectiveGraphic(props: PerspectiveGraphicProps) {
+interface GraphicPointDisplayProps {
+  graphicPointX: number
+  graphicPointY: number
+  graphicPointSize: number
+  graphicPointColor: string
+}
+
+function PerspectiveGraphicBase(props: PerspectiveGraphicBaseProps) {
   const {
     someWorldPoints,
     cameraDepth,
     perspectiveDepthNear,
     perspectiveDepthFar,
     perspectiveVerticalFieldOfViewAngle,
+    backgroundColor,
+    GraphicPointDisplay,
     lightDepth,
-    backgroundColor = 'black',
   } = props
   const { perspectivePoints } = getPerspectivePoints({
     someWorldPoints,
@@ -63,27 +138,27 @@ export function PerspectiveGraphic(props: PerspectiveGraphicProps) {
           .sort((pointA, pointB) => pointA[2] - pointB[2])
           .map(
             ([
-              perspectiveCellX,
-              perspectiveCellY,
-              perspectiveCellZ,
-              perspectiveCellSize,
-              perspectiveCellColor,
-              perspectiveCellDistance,
-            ]) => {
-              const graphicCellSize =
-                perspectiveCellSize / perspectiveCellDistance
-              return perspectiveCellDistance >= perspectiveDepthNear &&
-                perspectiveCellDistance <= perspectiveDepthFar ? (
-                <circle
-                  cx={perspectiveCellX / perspectiveCellDistance}
-                  cy={perspectiveCellY / perspectiveCellDistance}
-                  r={graphicCellSize}
-                  fill={new Color(perspectiveCellColor)
-                    .darken(perspectiveCellDistance / lightDepth)
-                    .string()}
+              perspectivePointX,
+              perspectivePointY,
+              perspectivePointZ,
+              perspectivePointSize,
+              perspectivePointColor,
+              perspectivePointDistance,
+            ]) =>
+              perspectivePointDistance >= perspectiveDepthNear &&
+              perspectivePointDistance <= perspectiveDepthFar ? (
+                <GraphicPointDisplay
+                  graphicPointX={perspectivePointX / perspectivePointDistance}
+                  graphicPointY={perspectivePointY / perspectivePointDistance}
+                  graphicPointSize={
+                    perspectivePointSize / perspectivePointDistance
+                  }
+                  graphicPointColor={perspectivePointColor}
+                  // fill={new Color(perspectivePointColor)
+                  //   .darken(perspectivePointDistance / lightDepth)
+                  //   .string()}
                 />
               ) : null
-            }
           )}
       </g>
     </svg>
@@ -92,7 +167,7 @@ export function PerspectiveGraphic(props: PerspectiveGraphicProps) {
 
 interface GetPerspectivePointsApi
   extends Pick<
-    PerspectiveGraphicProps,
+    PerspectiveGraphicBaseProps,
     | 'cameraDepth'
     | 'perspectiveDepthNear'
     | 'perspectiveDepthFar'
@@ -169,4 +244,8 @@ function getPerspectivePoint(
   pointResult[3] = perspectiveScalarSize * pointResult[3]
   pointResult[5] = perspectiveScalarDistance * cameraCellZ
   return pointResult
+}
+
+function throwInvalidPathError(errorMessage: string): never {
+  throw new Error(errorMessage)
 }

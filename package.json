@@ -8,6 +8,7 @@
     "sass-loader": "^13.3.2"
   },
   "dependencies": {
+    "clumsy-math": "^4.0.0-alpha.3",
     "color": "^4.2.3",
     "preact": "^10.17.1",
     "preact-render-to-string": "^6.2.1",
